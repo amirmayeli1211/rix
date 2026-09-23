@@ -1,0 +1,21 @@
+const $ = (s) => document.querySelector(s)
+const form = $('#builder')
+let current = null
+const fa = new Intl.NumberFormat('fa-IR')
+function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+async function api(path, options={}){const response=await fetch(path,{headers:{'Content-Type':'application/json'},...options});const isJson=(response.headers.get('content-type')||'').includes('json');const data=isJson?await response.json():await response.text();if(!response.ok)throw new Error(data.message||'درخواست ناموفق بود');return data}
+function download(name, content, type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+function render(record){current=record;$('#json').textContent=JSON.stringify(record.config,null,2);$('#vless').textContent=record.vless_uri;$('#subscription').textContent=record.subscription_base64;for(const id of ['copy-json','download-json','copy-vless','copy-subscription','download-subscription'])$('#'+id).disabled=false}
+async function copy(text,message){try{await navigator.clipboard.writeText(text);toast(message)}catch{const area=document.createElement('textarea');area.value=text;document.body.append(area);area.select();document.execCommand('copy');area.remove();toast(message)}}
+$('#copy-json').onclick=()=>copy(JSON.stringify(current.config,null,2),'JSON کپی شد')
+$('#copy-vless').onclick=()=>copy(current.vless_uri,'لینک VLESS کپی شد')
+$('#copy-subscription').onclick=()=>copy(current.subscription_base64,'اشتراک کپی شد')
+$('#download-json').onclick=()=>download(`${current.name}.json`,JSON.stringify(current.config,null,2),'application/json')
+$('#download-subscription').onclick=()=>download(`${current.name}.txt`,current.subscription_base64,'text/plain')
+form.elements.domain.value=window.location.hostname
+form.addEventListener('submit',async(e)=>{e.preventDefault();$('#form-error').textContent='';const data={domain:form.elements.domain.value,allow_insecure:0};const button=form.querySelector('button[type=submit]');button.disabled=true;try{const record=await api('/api/v1/configs/generate',{method:'POST',body:JSON.stringify(data)});render(record);toast('کانفیگ ساخته و ذخیره شد');await load()}catch(error){$('#form-error').textContent=error.message}finally{button.disabled=false}})
+async function load(){try{const data=await api('/api/v1/configs');const list=$('#saved-list');list.replaceChildren();$('#count').textContent=`${fa.format(data.configs.length)} کانفیگ`;if(!data.configs.length){const p=document.createElement('p');p.className='empty';p.textContent='هنوز کانفیگی ذخیره نشده است.';list.append(p);return}for(const item of data.configs){const row=document.createElement('article');row.className='saved-item';const details=document.createElement('div');const name=document.createElement('b');name.textContent=item.name;const meta=document.createElement('span');meta.textContent=`${item.server}:${item.port} · VLESS/WS · ${item.tls?'TLS':'بدون TLS'}`;details.append(name,meta);const actions=document.createElement('div');actions.className='item-actions';const show=document.createElement('button');show.textContent='نمایش';show.onclick=()=>{render(item);document.querySelector('#saved').scrollIntoView({behavior:'smooth'});window.scrollTo({top:0,behavior:'smooth'})};const remove=document.createElement('button');remove.className='danger';remove.textContent='حذف';remove.onclick=async()=>{if(!confirm(`کانفیگ «${item.name}» حذف شود؟`))return;await api(`/api/v1/configs/${encodeURIComponent(item.id)}`,{method:'DELETE'});if(current?.id===item.id)current=null;await load();toast('کانفیگ حذف شد')};actions.append(show,remove);row.append(details,actions);list.append(row)}}catch(error){toast(error.message)}}
+$('#refresh').onclick=load
+$('#theme').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('rix-theme',document.body.classList.contains('light')?'light':'dark');$('#theme').textContent=document.body.classList.contains('light')?'☾ تاریک':'☀ روشن'}
+if(localStorage.getItem('rix-theme')==='light'){$('body').classList.add('light');$('#theme').textContent='☾ تاریک'}
+api('/api/health').then(()=>$('#health').textContent='آماده').catch(()=>$('#health').textContent='قطع').finally(load)

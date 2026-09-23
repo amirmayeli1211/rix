@@ -1,0 +1,2 @@
+# RixPanel MVP uses Python's standard library only.
+# This file is intentionally dependency-free.

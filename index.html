@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08101f">
+  <title>RixPanel — سازنده کانفیگ محلی</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><span class="mark">R</span><div><b>RixPanel</b><small>نسخه محلی ۱.۰</small></div></div>
+    <nav><a class="active" href="#builder">سازنده کانفیگ</a><a href="#saved">کانفیگ‌های ذخیره‌شده</a></nav>
+    <div class="local"><i></i><div><b>اجرای محلی</b><span>بدون ورود و بدون نود</span></div></div>
+  </aside>
+  <main>
+    <header><div><small>RIX PANEL / MVP 1</small><h1>سازنده کانفیگ VLESS</h1><p>دانشخواه کامل بساز، خروجی بگیر و همین‌جا نگه دار.</p></div><button id="theme" class="ghost" aria-label="تغییر پوسته">☀ روشن</button></header>
+    <section class="stats"><article><span>پروتکل</span><b>VLESS / WebSocket</b></article><article><span>ذخیره‌سازی</span><b>فایل محلی JSON</b></article><article><span>وضعیت</span><b id="health">در حال بررسی…</b></article></section>
+    <div class="layout">
+      <form id="builder" class="card">
+        <label>دامنه پنل<input name="domain" required dir="ltr" placeholder="panel.example.com" autocomplete="url" readonly></label>
+        <p class="helper">دامنه از آدرس همین پنل خوانده می‌شود؛ SNI، Host، پورت ۴۴۳، مسیر و UUID خودکار هستند.</p>
+        <input type="hidden" name="allow_insecure" value="0">
+        <button class="primary" type="submit">ساخت خودکار کانفیگ</button>
+        <p id="form-error" class="error" role="alert"></p>
+      </form>
+      <section class="results">
+        <article class="card preview"><div class="card-head"><div><h2>پیش‌نمایش زنده</h2><p>خروجی نهایی پس از ساخت اینجا نمایش داده می‌شود.</p></div><span class="dot"></span></div><pre id="json">هنوز کانفیگی ساخته نشده است.</pre><div class="buttons"><button id="copy-json" disabled>کپی JSON</button><button id="download-json" disabled>دانلود JSON</button></div></article>
+        <article class="card output"><div class="card-head"><div><h2>خروجی اشتراک</h2><p>لینک VLESS و اشتراک Base64</p></div></div><label class="output-label">لینک VLESS</label><div class="copy-box"><code id="vless">—</code><button id="copy-vless" disabled>کپی</button></div><label class="output-label">اشتراک Base64</label><div class="copy-box"><code id="subscription">—</code><button id="copy-subscription" disabled>کپی</button></div><div class="buttons"><button id="download-subscription" disabled>دانلود فایل اشتراک</button></div><p class="privacy">این نسخه نود، ترافیک، تأخیر، ورود و سرویس ابری ندارد.</p></article>
+      </section>
+    </div>
+    <section id="saved" class="card saved"><div class="card-head"><div><h2>کانفیگ‌های ذخیره‌شده</h2><p id="count">۰ کانفیگ</p></div><button id="refresh">تازه‌سازی</button></div><div id="saved-list" class="saved-list"><p class="empty">هنوز کانفیگی ذخیره نشده است.</p></div></section>
+  </main>
+</div>
+<div id="toast" role="status"></div>
+<script src="/app.js"></script>
+</body>
+</html>
